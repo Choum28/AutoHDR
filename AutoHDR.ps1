@@ -15,7 +15,8 @@
 	.\AutoHdr.ps1
 	
 		Launch the script
-	
+	1.1		08.09.2023  Add verification for Removal and uninstall option by security
+						This will prevent any key or value that were not created by the script to be removed.
     1.0     06.09.2023	First version
 .LINK
  #>
@@ -129,14 +130,13 @@ $B_Submit.Add_Click({
 					New-Item -Path $RegistryPath -Force | Out-Null
 				}
 				if (-not (Test-Path $RegistryPath\$Game)) {
-				New-Item $RegistryPath -Name $Game
+					New-Item $RegistryPath -Name $Game
 				}
 				Set-ItemProperty -Path "$RegistryPath\$Game" -Name "Name" -Value $Name
 				Set-ItemProperty -Path "$RegistryPath\$Game" -Name "D3DBehaviors" -Value $D3DBehaviors
-
-				[System.Windows.Forms.MessageBox]::Show("Registry values for $Game installed.")
+				[System.Windows.Forms.MessageBox]::Show("AutoHDR registry values for $Game created.")
 			} catch {
-				[System.Windows.Forms.MessageBox]::Show("Error installing registry values.`n$($_.Exception.Message)")
+				[System.Windows.Forms.MessageBox]::Show("Error installing AutoHDR registry values.`n$($_.Exception.Message)")
 			}
 		}
     } elseif ($global:Action -eq "r") {
@@ -144,6 +144,7 @@ $B_Submit.Add_Click({
 		# test if game is present
 		# Check if game is present in registry
 		# delete key in registry
+		# Check to not remove different key / value created by other program or manually by user.
 		if ([string]::IsNullOrEmpty($T_GameName.Text)){
 			$fail = $true
 			[System.Windows.Forms.MessageBox]::Show("Enter the game name")
@@ -154,30 +155,69 @@ $B_Submit.Add_Click({
 			[System.Windows.Forms.MessageBox]::Show("$Game not found in registry")
 		}
 			if ($fail -eq $false) {
-				try {
-					Remove-Item "$RegistryPath\$Game" -r
-				} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove Registry entries for $Game.")
+				if ((Get-Item $RegistryPath\$game).Property -contains "D3DBehaviors"){
+					try {
+						Remove-ItemProperty -Path "$RegistryPath\$Game" -Name "D3DBehaviors"
+					} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove AutoHDR registry property D3DBehaviors for $Game.")}
 				}
-				[System.Windows.Forms.MessageBox]::Show("Registry entries for $Game removed.")	
-				
+				if ((Get-Item $RegistryPath\$game).Property -contains "Name"){
+					try {
+						Remove-ItemProperty -Path "$RegistryPath\$Game" -Name "Name"
+					} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove AutoHDR registry property Name for $Game.")}
+				}
+				if ((Get-ChildItem $RegistryPath\$game).count -eq 0){
+					if (((Get-Item $RegistryPath\$game).Property).count -eq 0){
+						try{
+							Remove-Item "$RegistryPath\$Game" -r
+						} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove AutoHDR registry entries for $Game.")}
+					}
+				}
+				[System.Windows.Forms.MessageBox]::Show("AutoHDR registry entries for $Game removed.")
 			}
-		}elseif ($global:Action -eq "u") {
+	}elseif ($global:Action -eq "u") {
 		# Uninstall choice
 		# cehck all games in registry
 		# delete key in registry if game is present
+		# Check to not remove different key / value created by other program or manually by user.
+		#Check to remove the Direct3D key (should be empty.)
 		$list = Get-ChildItem $RegistryPath
-		if ($list){ 
+		if ($list)
+		{ 
 			foreach ($entry in $list.name){
-			$Game = $entry|split-path -leaf
-			Remove-Item "$RegistryPath\$Game" -r
-			[System.Windows.Forms.MessageBox]::Show("$Game registry entries removed.")
+				$Game = $entry|split-path -leaf
+				if ((Get-Item $RegistryPath\$game).Property -contains "D3DBehaviors"){
+					try{
+						Remove-ItemProperty -Path "$RegistryPath\$Game" -Name "D3DBehaviors"
+					} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove AutoHDR registry property D3DBehaviors for $Game.")}
+				}
+				if ((Get-Item $RegistryPath\$game).Property -contains "Name"){
+					try {
+							Remove-ItemProperty -Path "$RegistryPath\$Game" -Name "Name"
+					} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove AutoHDR registry property Name for $Game.")}
+				}
+				if ((Get-ChildItem $RegistryPath\$game).count -eq 0){
+					if (((Get-Item $RegistryPath\$game).Property).count -eq 0){
+						try{
+							Remove-Item "$RegistryPath\$Game" -r
+						} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove AutoHDR registry entries for $Game.")}
+					}
+				}
+				[System.Windows.Forms.MessageBox]::Show("$Game AutoHDR registry entries removed.")
 			}
-			[System.Windows.Forms.MessageBox]::Show("All registry entries removed.")
-		} else {  [System.Windows.Forms.MessageBox]::Show("No game found in registry.")
-		}
+			if ((Get-ChildItem $RegistryPath).count -eq 0){
+				if (((Get-Item $RegistryPath).Property).count -eq 0){
+					try {
+						Remove-Item "$RegistryPath"
+					} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove registry key Direct3D.")}
+				}
+			}
+			[System.Windows.Forms.MessageBox]::Show("All AutoHDR registry entries removed.")
+		} else {  
+				[System.Windows.Forms.MessageBox]::Show("No game found in registry.")
+			}
 	}	else {
-        [System.Windows.Forms.MessageBox]::Show("Invalid action. Please select 'Install', 'Remove' or 'Uninstall'.")
-    }
+				[System.Windows.Forms.MessageBox]::Show("Invalid action. Please select 'Install', 'Remove' or 'Uninstall'.")
+		}
 })
 # Display forms
 $Window.ShowDialog() | out-null

@@ -9,8 +9,8 @@ Registry created will be created under the HKEY_CURRENT_USER\Software\Microsoft\
 		BufferUpgradeOverride (mandatory to enable AutoHDR)
 		BufferUpgradeEnable10Bit (optional, use it if you have a true 10bits colors monitor/TV)
 
-<img src="https://i.imgur.com/08FS16Y.png">
-<img src="https://i.imgur.com/08FS16Y.png">
+<img src="https://i.imgur.com/yh5HzER.png">
+<img src="https://i.imgur.com/V2B4HQf.png">
 
 
 The Gui support removel of game autohdr setting, update of already existing game, or provide a unisntall function to remove all registry key created.

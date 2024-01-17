@@ -36,20 +36,19 @@ function Refresh-Game {
 	$C_Listgame.Items.Clear()
 	if ((Test-Path $RegistryPath)){
 		$list = Get-ChildItem $RegistryPath
-					if ($list){ 
-						foreach ($entry in $list.name){
-							$Game = $entry|split-path -leaf
-							if ((Get-Item $RegistryPath\$game).Property -contains "D3DBehaviors"){
-								if ((Get-Item $RegistryPath\$game).Property -contains "Name"){
-									$C_Listgame.Items.add($game)
-								}
-							}
-						}
+		if ($list){ 
+			foreach ($entry in $list.name){
+				$Game = $entry|split-path -leaf
+				if ((Get-Item $RegistryPath\$game).Property -contains "D3DBehaviors"){
+					if ((Get-Item $RegistryPath\$game).Property -contains "Name"){
+						$C_Listgame.Items.add($game)
 					}
+				}
+			}
+		}
 		$C_Listgame.SelectedIndex = $C_Listgame.Items.Count - 1
 	}
 }
-
 
 #WPF form creation
 [xml]$inputXML =@"

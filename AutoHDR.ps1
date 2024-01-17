@@ -15,6 +15,7 @@
 	.\AutoHdr.ps1
 	
 		Launch the script
+	1.4		17.01.2023	Switch remaining Windows forms for WPF.
 	1.3		10.09.2023	Add Icons in message, bug fix.
 	1.2		09.09.2023	Add Combobox for removal, label rework
 	1.1		08.09.2023  Add verification for Removal and uninstall option by security
@@ -24,8 +25,6 @@
  #>
 
 [void][System.Reflection.Assembly]::LoadWithPartialName('PresentationFramework')
-[void][System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms")
-[System.Windows.Forms.Application]::EnableVisualStyles()
 
 # Define the registry path,
 $RegistryPath = "HKCU:\SOFTWARE\Microsoft\Direct3D"
@@ -53,41 +52,32 @@ function Refresh-Game {
 
 
 #WPF form creation
-$inputXML =@"
-<Window x:Class="MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AutoHdr2"
-        mc:Ignorable="d"
+[xml]$inputXML =@"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         Title="AutoHdr" Height="313" Width="489">
     <Grid Margin="0,0,0,0">
         <Label Content="Select the action" HorizontalAlignment="Left" Margin="27,25,0,0" VerticalAlignment="Top"/>
-        <RadioButton x:Name="R_install" Content="Install Game" HorizontalAlignment="Left" Margin="259,31,0,0" VerticalAlignment="Top"/>
-        <RadioButton x:Name="R_remove" Content="Remove Game" HorizontalAlignment="Left" Margin="259,51,0,0" VerticalAlignment="Top"/>
-        <RadioButton x:Name="R_uninstall" Content="Uninstall All" HorizontalAlignment="Left" Margin="259,71,0,0" VerticalAlignment="Top"/>
-		<Label x:Name="T_Nametext" Content="Enter the name of the game" HorizontalAlignment="Left" Margin="33,115,0,0" VerticalAlignment="Top"/>
-		<Label x:Name="T_NametextR" Content="Choose game to remove" HorizontalAlignment="Left" Margin="33,115,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="T_GameName" HorizontalAlignment="Left" Margin="307,119,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
-        <Label x:Name="T_Exetext" Content="Enter the game's exe name (ex: game.exe)" HorizontalAlignment="Left" Margin="33,143,0,0" VerticalAlignment="Top"/>	
-        <TextBox x:Name="T_GameExe" HorizontalAlignment="Left" Margin="307,147,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
-		<Label x:Name="T_10Bit" Content="Optional setting for D3D Behaviors:" HorizontalAlignment="Left" Margin="50,183,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="C_10bit" Content="BufferUpgradeEnable10Bit" HorizontalAlignment="Left" Margin="287,188,0,0" VerticalAlignment="Top"/>
-		<Button x:Name="B_Submit" Content="Submit" HorizontalAlignment="Left" Margin="20,230,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.265,0.155"/>
+        <RadioButton Name="R_install" Content="Install Game" HorizontalAlignment="Left" Margin="259,31,0,0" VerticalAlignment="Top"/>
+        <RadioButton Name="R_remove" Content="Remove Game" HorizontalAlignment="Left" Margin="259,51,0,0" VerticalAlignment="Top"/>
+        <RadioButton Name="R_uninstall" Content="Uninstall All" HorizontalAlignment="Left" Margin="259,71,0,0" VerticalAlignment="Top"/>
+		<Label Name="T_Nametext" Content="Enter the name of the game" HorizontalAlignment="Left" Margin="33,115,0,0" VerticalAlignment="Top"/>
+		<Label Name="T_NametextR" Content="Choose game to remove" HorizontalAlignment="Left" Margin="33,115,0,0" VerticalAlignment="Top"/>
+        <TextBox Name="T_GameName" HorizontalAlignment="Left" Margin="307,119,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <Label Name="T_Exetext" Content="Enter the game's exe name (ex: game.exe)" HorizontalAlignment="Left" Margin="33,143,0,0" VerticalAlignment="Top"/>	
+        <TextBox Name="T_GameExe" HorizontalAlignment="Left" Margin="307,147,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+		<Label Name="T_10Bit" Content="Optional setting for D3D Behaviors:" HorizontalAlignment="Left" Margin="50,183,0,0" VerticalAlignment="Top"/>
+        <CheckBox Name="C_10bit" Content="BufferUpgradeEnable10Bit" HorizontalAlignment="Left" Margin="287,188,0,0" VerticalAlignment="Top"/>
+		<Button Name="B_Submit" Content="Submit" HorizontalAlignment="Left" Margin="20,230,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.265,0.155"/>
 		<ComboBox Name="C_Listgame" HorizontalAlignment="Left" Margin="307,119,0,0" VerticalAlignment="Top" Width="120"/>
     </Grid>
 </Window>
-
 "@
-# remove unneeded XAML options for powershell
-$inputXML = $inputXML -replace 'mc:Ignorable="d"','' -replace "x:N",'N'  -replace '^<Win.*', '<Window'
-[xml]$XAML = $inputXML
-$reader=(New-Object System.Xml.XmlNodeReader $xaml)
-$Window =[Windows.Markup.XamlReader]::Load( $reader )
-$xaml.SelectNodes("//*[@Name]") | Foreach-Object { Set-Variable -Name ($_.Name) -Value $Window.FindName($_.Name)}
 
-# button, radiobox, text settings
+$reader=(New-Object System.Xml.XmlNodeReader $inputXML)
+$Window =[Windows.Markup.XamlReader]::Load( $reader )
+$inputXML.SelectNodes("//*[@Name]") | Foreach-Object { Set-Variable -Name ($_.Name) -Value $Window.FindName($_.Name)}
+
+# button, radiobox, text settings and events
 $C_Listgame.visibility="Hidden"
 $T_NametextR.visibility="Hidden"
 
@@ -151,20 +141,20 @@ $B_Submit.Add_Click({
 		#Test if game is already present (to create regkey or not, then String value are created or updated)
 		if ([string]::IsNullOrEmpty($T_GameName.Text)){
 			$fail = $true
-			[System.Windows.Forms.MessageBox]::Show("Enter the game name","",0,48)
+			[System.Windows.MessageBox]::Show("Enter the game name","",0,48)
 		}
 		if ([string]::IsNullOrEmpty($T_GameExe.Text)){
 			$fail = $true
-			[System.Windows.Forms.MessageBox]::Show("Enter the game Exe name","",0,48)
+			[System.Windows.MessageBox]::Show("Enter the game Exe name","",0,48)
 		}elseif (!($T_GameExe.Text -like '*.exe')){
 					$fail = $true
 					$T_GameExe.Foreground="Red"
-					[System.Windows.Forms.MessageBox]::Show("The game exe name must end with '.exe'","",0,48)
+					[System.Windows.MessageBox]::Show("The game exe name must end with '.exe'","",0,48)
 					$T_GameExe.Foreground="Black"
 		}elseif ($T_GameExe.Text.Length -eq 4){
 				$fail = $true
 				$T_GameExe.Foreground="Red"
-				[System.Windows.Forms.MessageBox]::Show("Enter a valid exe name","",0,48)
+				[System.Windows.MessageBox]::Show("Enter a valid exe name","",0,48)
 				$T_GameExe.Foreground="Black"
 		}
 	    if ($fail -eq $false) {
@@ -184,9 +174,9 @@ $B_Submit.Add_Click({
 				} else { $text = "updated" }
 				Set-ItemProperty -Path "$RegistryPath\$Game" -Name "Name" -Value $Name
 				Set-ItemProperty -Path "$RegistryPath\$Game" -Name "D3DBehaviors" -Value $D3DBehaviors
-				[System.Windows.Forms.MessageBox]::Show("AutoHDR registry values for $Game $text.","",0,64)
+				[System.Windows.MessageBox]::Show("AutoHDR registry values for $Game $text.","",0,64)
 			} catch {
-				[System.Windows.Forms.MessageBox]::Show("Error installing AutoHDR registry values.`n$($_.Exception.Message)","",0,16)
+				[System.Windows.MessageBox]::Show("Error installing AutoHDR registry values.`n$($_.Exception.Message)","",0,16)
 			}
 		}
     } elseif ($global:Action -eq "r") {
@@ -197,32 +187,32 @@ $B_Submit.Add_Click({
 		# Check to not remove different key / value created by other program or manually by user.
 		if ([string]::IsNullOrEmpty($C_Listgame.SelectedItem)){
 			$fail = $true
-			[System.Windows.Forms.MessageBox]::Show("No game found","",0,64)
+			[System.Windows.MessageBox]::Show("No game found","",0,64)
 		}
 		$Game = $C_Listgame.SelectedItem
 		if (-not (test-path $RegistryPath\$Game)){
 			$fail = $true
-			[System.Windows.Forms.MessageBox]::Show("$Game not found in registry","",0,64)
+			[System.Windows.MessageBox]::Show("$Game not found in registry","",0,64)
 		}
 			if ($fail -eq $false) {
 				if ((Get-Item $RegistryPath\$game).Property -contains "D3DBehaviors"){
 					try {
 						Remove-ItemProperty -Path "$RegistryPath\$Game" -Name "D3DBehaviors"
-					} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove AutoHDR registry property D3DBehaviors for $Game.","",0,16)}
+					} catch { System.Windows.MessageBox]::Show("Error trying to remove AutoHDR registry property D3DBehaviors for $Game.","",0,16)}
 				}
 				if ((Get-Item $RegistryPath\$game).Property -contains "Name"){
 					try {
 						Remove-ItemProperty -Path "$RegistryPath\$Game" -Name "Name"
-					} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove AutoHDR registry property Name for $Game.","",0,16)}
+					} catch { System.Windows.MessageBox]::Show("Error trying to remove AutoHDR registry property Name for $Game.","",0,16)}
 				}
 				if ((Get-ChildItem $RegistryPath\$game).count -eq 0){
 					if (((Get-Item $RegistryPath\$game).Property).count -eq 0){
 						try{
 							Remove-Item "$RegistryPath\$Game" -r
-						} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove AutoHDR registry entries for $Game.","",0,16)}
+						} catch { System.Windows.MessageBox]::Show("Error trying to remove AutoHDR registry entries for $Game.","",0,16)}
 					}
 				}
-				[System.Windows.Forms.MessageBox]::Show("AutoHDR registry entries for $Game removed.","",0,64)
+				[System.Windows.MessageBox]::Show("AutoHDR registry entries for $Game removed.","",0,64)
 				Refresh-Game
 			}
 	}elseif ($global:Action -eq "u") {
@@ -241,35 +231,35 @@ $B_Submit.Add_Click({
 				if ((Get-Item $RegistryPath\$game).Property -contains "D3DBehaviors"){
 					try{
 						Remove-ItemProperty -Path "$RegistryPath\$Game" -Name "D3DBehaviors"
-					} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove AutoHDR registry property D3DBehaviors for $Game.","",0,16)}
+					} catch { System.Windows.MessageBox]::Show("Error trying to remove AutoHDR registry property D3DBehaviors for $Game.","",0,16)}
 				}
 				if ((Get-Item $RegistryPath\$game).Property -contains "Name"){
 					try {
 							Remove-ItemProperty -Path "$RegistryPath\$Game" -Name "Name"
-					} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove AutoHDR registry property Name for $Game.","",0,16)}
+					} catch { System.Windows.MessageBox]::Show("Error trying to remove AutoHDR registry property Name for $Game.","",0,16)}
 				}
 				if ((Get-ChildItem $RegistryPath\$game).count -eq 0){
 					if (((Get-Item $RegistryPath\$game).Property).count -eq 0){
 						try{
 							Remove-Item "$RegistryPath\$Game" -r
-						} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove AutoHDR registry entries for $Game.","",0,16)}
+						} catch { System.Windows.MessageBox]::Show("Error trying to remove AutoHDR registry entries for $Game.","",0,16)}
 					}
 				}
-				[System.Windows.Forms.MessageBox]::Show("$Game AutoHDR registry entries removed.","",0,64)
+				[System.Windows.MessageBox]::Show("$Game AutoHDR registry entries removed.","",0,64)
 			}
 			if ((Get-ChildItem $RegistryPath).count -eq 0){
 				if (((Get-Item $RegistryPath).Property).count -eq 0){
 					try {
 						Remove-Item "$RegistryPath"
-					} catch { System.Windows.Forms.MessageBox]::Show("Error trying to remove registry key Direct3D.","",0,16)}
+					} catch { System.Windows.MessageBox]::Show("Error trying to remove registry key Direct3D.","",0,16)}
 				}
 			}
-			[System.Windows.Forms.MessageBox]::Show("All AutoHDR registry entries removed.","",0,64)
+			[System.Windows.MessageBox]::Show("All AutoHDR registry entries removed.","",0,64)
 		} else {  
-				[System.Windows.Forms.MessageBox]::Show("No game found in registry.","",0,64)
+				[System.Windows.MessageBox]::Show("No game found in registry.","",0,64)
 			}
 	}	else {
-				[System.Windows.Forms.MessageBox]::Show("Invalid action. Please select 'Install', 'Remove' or 'Uninstall'.","",0,64)
+				[System.Windows.MessageBox]::Show("Invalid action. Please select 'Install', 'Remove' or 'Uninstall'.","",0,64)
 		}
 })
 # Display forms

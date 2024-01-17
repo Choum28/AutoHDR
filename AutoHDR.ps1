@@ -24,7 +24,7 @@
 .LINK
  #>
 
-[void][System.Reflection.Assembly]::LoadWithPartialName('PresentationFramework')
+Add-Type -AssemblyName PresentationFramework
 
 # Define the registry path,
 $RegistryPath = "HKCU:\SOFTWARE\Microsoft\Direct3D"

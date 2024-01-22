@@ -31,7 +31,7 @@ $RegistryPath = "HKCU:\SOFTWARE\Microsoft\Direct3D"
 $fail = $false
 
 # Detect game in registry that have, populate combobox, default selection.
-function Refresh-Game {
+function Update-Game {
 	$Listgame=@()
 	$C_Listgame.Items.Clear()
 	if ((Test-Path $RegistryPath)){
@@ -66,7 +66,7 @@ function Refresh-Game {
         <TextBox Name="T_GameExe" HorizontalAlignment="Left" Margin="307,147,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
 		<Label Name="T_10Bit" Content="Optional setting for D3D Behaviors:" HorizontalAlignment="Left" Margin="50,183,0,0" VerticalAlignment="Top"/>
         <CheckBox Name="C_10bit" Content="BufferUpgradeEnable10Bit" HorizontalAlignment="Left" Margin="287,188,0,0" VerticalAlignment="Top"/>
-		<Button Name="B_Submit" Content="Submit" HorizontalAlignment="Left" Margin="20,230,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.265,0.155"/>
+		<Button Name="B_Submit" HorizontalAlignment="Left" Margin="20,230,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.265,0.155"/>
 		<ComboBox Name="C_Listgame" HorizontalAlignment="Left" Margin="307,119,0,0" VerticalAlignment="Top" Width="120"/>
     </Grid>
 </Window>
@@ -79,6 +79,7 @@ $inputXML.SelectNodes("//*[@Name]") | Foreach-Object { Set-Variable -Name ($_.Na
 # button, radiobox, text settings and events
 $C_Listgame.visibility="Hidden"
 $T_NametextR.visibility="Hidden"
+$B_Submit.visibility ="Hidden"
 
 $R_install.Add_Checked({
             $T_Nametext.visibility="Visible"
@@ -89,12 +90,12 @@ $R_install.Add_Checked({
 			$C_10bit.visibility="Visible"
 			$C_Listgame.visibility="Hidden"
 			$T_NametextR.visibility="Hidden"
-			$global:Action = "i"
+			$B_Submit.visibility ="visible"
 			$B_Submit.Content="Install or update"
         })
 		
 $R_remove.Add_Checked({
-			Refresh-Game
+			Update-Game
 			$T_GameExe.Text=""
             $T_Nametext.visibility="Hidden"
 			$T_GameName.visibility="Hidden"
@@ -104,7 +105,7 @@ $R_remove.Add_Checked({
 			$T_10Bit.visibility="Hidden"
 			$C_10bit.visibility="Hidden"
 			$C_Listgame.visibility="Visible"
-			$global:Action = "r"
+			$B_Submit.visibility ="visible"
 			$B_Submit.Content="Remove Game"
         })
 
@@ -119,7 +120,7 @@ $R_Uninstall.Add_Checked({
 			$C_10bit.visibility="Hidden"
 			$C_Listgame.visibility="Hidden"
 			$T_NametextR.visibility="Hidden"
-			$global:Action = "u"
+			$B_Submit.visibility ="visible"
 			$B_Submit.Content="Uninstall all"
         })
 		
@@ -134,7 +135,7 @@ $C_10bit.Add_UnChecked({
 #Code when clicking submit
 $B_Submit.Add_Click({
 	
-    if ($global:Action -eq "i") {
+    if ($R_install.IsChecked) {
 		# Install action
 		#test if game name and exe name are present in textbox and valid
 		#Test if game is already present (to create regkey or not, then String value are created or updated)
@@ -178,7 +179,7 @@ $B_Submit.Add_Click({
 				[System.Windows.MessageBox]::Show("Error installing AutoHDR registry values.`n$($_.Exception.Message)","",0,16)
 			}
 		}
-    } elseif ($global:Action -eq "r") {
+    } elseif ($R_remove.IsChecked) {
 		# remove choice
 		# test if game is present
 		# Check if game is present in registry
@@ -187,39 +188,40 @@ $B_Submit.Add_Click({
 		if ([string]::IsNullOrEmpty($C_Listgame.SelectedItem)){
 			$fail = $true
 			[System.Windows.MessageBox]::Show("No game found","",0,64)
-		}
-		$Game = $C_Listgame.SelectedItem
-		if (-not (test-path $RegistryPath\$Game)){
-			$fail = $true
-			[System.Windows.MessageBox]::Show("$Game not found in registry","",0,64)
-		}
-			if ($fail -eq $false) {
-				if ((Get-Item $RegistryPath\$game).Property -contains "D3DBehaviors"){
-					try {
-						Remove-ItemProperty -Path "$RegistryPath\$Game" -Name "D3DBehaviors"
-					} catch { System.Windows.MessageBox]::Show("Error trying to remove AutoHDR registry property D3DBehaviors for $Game.","",0,16)}
-				}
-				if ((Get-Item $RegistryPath\$game).Property -contains "Name"){
-					try {
-						Remove-ItemProperty -Path "$RegistryPath\$Game" -Name "Name"
-					} catch { System.Windows.MessageBox]::Show("Error trying to remove AutoHDR registry property Name for $Game.","",0,16)}
-				}
-				if ((Get-ChildItem $RegistryPath\$game).count -eq 0){
-					if (((Get-Item $RegistryPath\$game).Property).count -eq 0){
-						try{
-							Remove-Item "$RegistryPath\$Game" -r
-						} catch { System.Windows.MessageBox]::Show("Error trying to remove AutoHDR registry entries for $Game.","",0,16)}
-					}
-				}
-				[System.Windows.MessageBox]::Show("AutoHDR registry entries for $Game removed.","",0,64)
-				Refresh-Game
+		}else {
+			$Game = $C_Listgame.SelectedItem
+			if (-not (test-path $RegistryPath\$Game)){
+				$fail = $true
+				[System.Windows.MessageBox]::Show("$Game not found in registry","",0,64)
 			}
-	}elseif ($global:Action -eq "u") {
+				if ($fail -eq $false) {
+					if ((Get-Item $RegistryPath\$game).Property -contains "D3DBehaviors"){
+						try {
+							Remove-ItemProperty -Path "$RegistryPath\$Game" -Name "D3DBehaviors"
+						} catch { System.Windows.MessageBox]::Show("Error trying to remove AutoHDR registry property D3DBehaviors for $Game.","",0,16)}
+					}
+					if ((Get-Item $RegistryPath\$game).Property -contains "Name"){
+						try {
+							Remove-ItemProperty -Path "$RegistryPath\$Game" -Name "Name"
+						} catch { System.Windows.MessageBox]::Show("Error trying to remove AutoHDR registry property Name for $Game.","",0,16)}
+					}
+					if ((Get-ChildItem $RegistryPath\$game).count -eq 0){
+						if (((Get-Item $RegistryPath\$game).Property).count -eq 0){
+							try{
+								Remove-Item "$RegistryPath\$Game" -r
+							} catch { System.Windows.MessageBox]::Show("Error trying to remove AutoHDR registry entries for $Game.","",0,16)}
+						}
+					}
+					[System.Windows.MessageBox]::Show("AutoHDR registry entries for $Game removed.","",0,64)
+					Update-Game
+			}
+		}
+	}else {
 		# Uninstall choice
-		# cehck all games in registry
+		# check all games in registry
 		# delete key in registry if game is present
 		# Check to not remove different key / value created by other program or manually by user.
-		#Check to remove the Direct3D key (should be empty.)
+		# Check to remove the Direct3D key (should be empty.)
 		if ((Test-Path $RegistryPath)){
 			$list = Get-ChildItem $RegistryPath
 		}
@@ -257,9 +259,7 @@ $B_Submit.Add_Click({
 		} else {  
 				[System.Windows.MessageBox]::Show("No game found in registry.","",0,64)
 			}
-	}	else {
-				[System.Windows.MessageBox]::Show("Invalid action. Please select 'Install', 'Remove' or 'Uninstall'.","",0,64)
-		}
+	}
 })
 # Display forms
 $Window.ShowDialog() | out-null

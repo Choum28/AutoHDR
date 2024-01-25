@@ -1,15 +1,14 @@
 <# 
 .SYNOPSIS
-    This script is a powxwershell script created to activate auto HDR on game that do not automatically trigger it.
+	This script is a powxwershell script created to activate auto HDR on game that do not automatically trigger it.
 
 .DESCRIPTION
-    This script will created specific registry key that will trigger autoHdr in unsupported Game.
+	This script will created specific registry key that will trigger autoHdr in unsupported Game.
 	Game should be a DX11/DX12 game.
 	Registry created will be store under the HKEY_CURRENT_USER\Software\Microsoft\Direct3D
-	registy key could be created
+	registy value that could be created for each Registry key (game name)
 		BufferUpgradeOverride (mandatory)
-		BufferUpgradeEnable10Bit (optional, use it if you have a true 10bits colors monitor/TV)
-	
+		BufferUpgradeEnable10Bit (optional, use it if you have a true 10bits colors monitor/TV)	
 
 .EXAMPLE
 	.\AutoHdr.ps1
@@ -21,7 +20,7 @@
 	1.2		09.09.2023	Add Combobox for removal, label rework
 	1.1		08.09.2023  Add verification for Removal and uninstall option by security
 						This will prevent any key or value that were not created by the script to be removed.
-    1.0     06.09.2023	First version
+	1.0		06.09.2023	First version
 .LINK
  #>
 
@@ -34,7 +33,7 @@ Import-LocalizedData -BindingVariable txt
 $RegistryPath = "HKCU:\SOFTWARE\Microsoft\Direct3D"
 $fail = $false
 
-# Detect game in registry that have, populate combobox, default selection.
+# Detect game in registry, populate combobox.
 function Update-Game {
 	$C_Listgame.Items.Clear()
 	if ((Test-Path $RegistryPath)){
@@ -56,25 +55,24 @@ function Update-Game {
 #WPF form creation
 [xml]$inputXML =@"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        Title="AutoHdr" Height="313" Width="489">
-    <Grid Margin="0,0,0,0">
-        <Label Name="L_action" HorizontalAlignment="Left" Margin="27,25,0,0" VerticalAlignment="Top"/>
-        <RadioButton Name="R_install" HorizontalAlignment="Left" Margin="259,31,0,0" VerticalAlignment="Top"/>
-        <RadioButton Name="R_remove" HorizontalAlignment="Left" Margin="259,51,0,0" VerticalAlignment="Top"/>
-        <RadioButton Name="R_uninstall" HorizontalAlignment="Left" Margin="259,71,0,0" VerticalAlignment="Top"/>
+		Title="AutoHdr" Height="313" Width="489">
+	<Grid Margin="0,0,0,0">
+		<Label Name="L_action" HorizontalAlignment="Left" Margin="27,25,0,0" VerticalAlignment="Top"/>
+		<RadioButton Name="R_install" HorizontalAlignment="Left" Margin="259,31,0,0" VerticalAlignment="Top"/>
+		<RadioButton Name="R_remove" HorizontalAlignment="Left" Margin="259,51,0,0" VerticalAlignment="Top"/>
+		<RadioButton Name="R_uninstall" HorizontalAlignment="Left" Margin="259,71,0,0" VerticalAlignment="Top"/>
 		<Label Name="T_Nametext" HorizontalAlignment="Left" Margin="33,115,0,0" VerticalAlignment="Top"/>
 		<Label Name="T_NametextR" HorizontalAlignment="Left" Margin="33,115,0,0" VerticalAlignment="Top"/>
-        <TextBox Name="T_GameName" HorizontalAlignment="Left" Margin="307,119,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
-        <Label Name="T_Exetext" HorizontalAlignment="Left" Margin="33,143,0,0" VerticalAlignment="Top"/>	
-        <TextBox Name="T_GameExe" HorizontalAlignment="Left" Margin="307,147,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+		<TextBox Name="T_GameName" HorizontalAlignment="Left" Margin="307,119,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+		<Label Name="T_Exetext" HorizontalAlignment="Left" Margin="33,143,0,0" VerticalAlignment="Top"/>	
+		<TextBox Name="T_GameExe" HorizontalAlignment="Left" Margin="307,147,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
 		<Label Name="T_10Bit" HorizontalAlignment="Left" Margin="50,183,0,0" VerticalAlignment="Top"/>
-        <CheckBox Name="C_10bit" HorizontalAlignment="Left" Margin="287,188,0,0" VerticalAlignment="Top"/>
+		<CheckBox Name="C_10bit" HorizontalAlignment="Left" Margin="287,188,0,0" VerticalAlignment="Top"/>
 		<Button Name="B_Submit" HorizontalAlignment="Left" Margin="20,230,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.265,0.155"/>
 		<ComboBox Name="C_Listgame" HorizontalAlignment="Left" Margin="307,119,0,0" VerticalAlignment="Top" Width="120"/>
     </Grid>
 </Window>
 "@
-
 $reader=(New-Object System.Xml.XmlNodeReader $inputXML)
 $Window =[Windows.Markup.XamlReader]::Load( $reader )
 $inputXML.SelectNodes("//*[@Name]") | Foreach-Object { Set-Variable -Name ($_.Name) -Value $Window.FindName($_.Name)}
@@ -96,52 +94,52 @@ $T_NametextR.visibility="Hidden"
 $B_Submit.visibility ="Hidden"
 
 $R_install.Add_Checked({
-            $T_Nametext.visibility="Visible"
-			$T_GameName.visibility="Visible"
-			$T_Exetext.visibility="Visible"
-			$T_GameExe.visibility="Visible"
-			$T_10Bit.visibility="Visible"
-			$C_10bit.visibility="Visible"
-			$C_Listgame.visibility="Hidden"
-			$T_NametextR.visibility="Hidden"
-			$B_Submit.visibility ="visible"
-			$B_Submit.Content=$txt.ButtonI
-        })
+		$T_Nametext.visibility="Visible"
+		$T_GameName.visibility="Visible"
+		$T_Exetext.visibility="Visible"
+		$T_GameExe.visibility="Visible"
+		$T_10Bit.visibility="Visible"
+		$C_10bit.visibility="Visible"
+		$C_Listgame.visibility="Hidden"
+		$T_NametextR.visibility="Hidden"
+		$B_Submit.visibility ="visible"
+		$B_Submit.Content=$txt.ButtonI
+	})
 		
 $R_remove.Add_Checked({
-			Update-Game
-			$T_GameExe.Text=""
-            $T_Nametext.visibility="Hidden"
-			$T_GameName.visibility="Hidden"
-			$T_NametextR.visibility="Visible"
-			$T_Exetext.visibility="Hidden"
-			$T_GameExe.visibility="Hidden"
-			$T_10Bit.visibility="Hidden"
-			$C_10bit.visibility="Hidden"
-			$C_Listgame.visibility="Visible"
-			$B_Submit.visibility ="visible"
-			$B_Submit.Content=$txt.ButtonR
-        })
+		Update-Game
+		$T_GameExe.Text=""
+		$T_Nametext.visibility="Hidden"
+		$T_GameName.visibility="Hidden"
+		$T_NametextR.visibility="Visible"
+		$T_Exetext.visibility="Hidden"
+		$T_GameExe.visibility="Hidden"
+		$T_10Bit.visibility="Hidden"
+	$C_10bit.visibility="Hidden"
+		$C_Listgame.visibility="Visible"
+		$B_Submit.visibility ="visible"
+		$B_Submit.Content=$txt.ButtonR
+	})
 
 $R_Uninstall.Add_Checked({
-			$T_GameName.Text=""
-			$T_GameExe.Text=""
-            $T_Nametext.visibility="Hidden"
-			$T_GameName.visibility="Hidden"
-			$T_Exetext.visibility="Hidden"
-			$T_GameExe.visibility="Hidden"
-			$T_10Bit.visibility="Hidden"
-			$C_10bit.visibility="Hidden"
-			$C_Listgame.visibility="Hidden"
-			$T_NametextR.visibility="Hidden"
-			$B_Submit.visibility ="visible"
-			$B_Submit.Content=$txt.ButtonU
-        })
-		
-#Code when clicking submit
+		$T_GameName.Text=""
+		$T_GameExe.Text=""
+		$T_Nametext.visibility="Hidden"
+		$T_GameName.visibility="Hidden"
+		$T_Exetext.visibility="Hidden"
+		$T_GameExe.visibility="Hidden"
+		$T_10Bit.visibility="Hidden"
+		$C_10bit.visibility="Hidden"
+		$C_Listgame.visibility="Hidden"
+		$T_NametextR.visibility="Hidden"
+		$B_Submit.visibility ="visible"
+		$B_Submit.Content=$txt.ButtonU
+	})
+
+#Code when clicking Ok Button
 $B_Submit.Add_Click({
 	
-    if ($R_install.IsChecked) {
+	if ($R_install.IsChecked) {
 		# Install action
 		#test if game name and exe name are present in textbox and valid
 		#Test if game is already present (to create regkey or not, then String value are created or updated)
@@ -169,7 +167,6 @@ $B_Submit.Add_Click({
 			if ($C_10bit.IsChecked) {
 			$D3DBehaviors = "BufferUpgradeOverride=1;BufferUpgradeEnable10Bit=1"
 		} else { $D3DBehaviors = "BufferUpgradeOverride=1" }
-
 			try {
 				if (-not (Test-Path $RegistryPath)) {
 					New-Item -Path $RegistryPath -Force | Out-Null
@@ -187,8 +184,7 @@ $B_Submit.Add_Click({
 		}
     } elseif ($R_remove.IsChecked) {
 		# remove choice
-		# test if game is present
-		# Check if game is present in registry
+		# test if game is present in registry
 		# delete key in registry
 		# Check to not remove different key / value created by other program or manually by user.
 		if ([string]::IsNullOrEmpty($C_Listgame.SelectedItem)){
@@ -225,9 +221,9 @@ $B_Submit.Add_Click({
 	}else {
 		# Uninstall choice
 		# check all games in registry
-		# delete key in registry if game is present
+		# delete key for each game present
 		# Check to not remove different key / value created by other program or manually by user.
-		# Check to remove the Direct3D key (should be empty.)
+		# Check to remove the main Direct3D key if empty.
 		if ((Test-Path $RegistryPath)){
 			$list = Get-ChildItem $RegistryPath
 		}

@@ -14,6 +14,7 @@
 	.\AutoHdr.ps1
 	
 		Launch the script
+	1.6		29.01.2024	Add Tooltips, Add OpenFileDialog
 	1.5		24.01.2024	Add translation support (psd1 file)
 	1.4		17.01.2024	Switch remaining Windows forms for WPF.
 	1.3		10.09.2023	Add Icons in message, bug fix.
@@ -25,6 +26,7 @@
  #>
 
 Add-Type -AssemblyName PresentationFramework
+Add-Type -AssemblyName System.Windows.Forms
 
 #load translation if exist, if not found will load en-US one.
 Import-LocalizedData -BindingVariable txt
@@ -63,13 +65,14 @@ function Update-Game {
 		<RadioButton Name="R_uninstall" HorizontalAlignment="Left" Margin="259,71,0,0" VerticalAlignment="Top"/>
 		<Label Name="T_Nametext" HorizontalAlignment="Left" Margin="33,115,0,0" VerticalAlignment="Top"/>
 		<Label Name="T_NametextR" HorizontalAlignment="Left" Margin="33,115,0,0" VerticalAlignment="Top"/>
-		<TextBox Name="T_GameName" HorizontalAlignment="Left" Margin="307,119,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
-		<Label Name="T_Exetext" HorizontalAlignment="Left" Margin="33,143,0,0" VerticalAlignment="Top"/>	
-		<TextBox Name="T_GameExe" HorizontalAlignment="Left" Margin="307,147,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+		<TextBox Name="T_GameName" HorizontalAlignment="Left" Margin="287,119,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Top" Width="150"/>
+		<TextBlock Name="T_Exetext" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="38,143,0,0" VerticalAlignment="Top" Width="260"/>	
+		<TextBox Name="T_GameExe" HorizontalAlignment="Left" Margin="287,147,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Top" Width="150"/>
 		<Label Name="T_10Bit" HorizontalAlignment="Left" Margin="50,183,0,0" VerticalAlignment="Top"/>
 		<CheckBox Name="C_10bit" HorizontalAlignment="Left" Margin="287,188,0,0" VerticalAlignment="Top"/>
 		<Button Name="B_Submit" HorizontalAlignment="Left" Margin="20,230,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.265,0.155"/>
-		<ComboBox Name="C_Listgame" HorizontalAlignment="Left" Margin="307,119,0,0" VerticalAlignment="Top" Width="120"/>
+		<ComboBox Name="C_Listgame" HorizontalAlignment="Left" Margin="287,119,0,0" VerticalAlignment="Top" Width="150"/>
+		<Button Name="B_ExePath" Content="..." HorizontalAlignment="Left" Height="22" Margin="440,145,0,0" VerticalAlignment="Top" Width="22"/>
     </Grid>
 </Window>
 "@
@@ -84,11 +87,14 @@ $R_remove.Content=$txt.mainR2
 $R_uninstall.Content=$txt.mainR3
 $T_Nametext.Content=$txt.txt1
 $T_NametextR.Content=$txt.txtr
-$T_Exetext.Content=$txt.txtexe
+$T_Exetext.Text=$txt.txtexe
 $T_10Bit.Content=$txt.txt2
 $C_10bit.Content=$txt.txtBuff
+$C_10bit.Tooltip=$txt.txtBuffTooltip
+$T_GameExe.ToolTip=$txt.txtexetooltip
 
 # button, radiobox, text settings and events
+$B_ExePath.visibility="Hidden"
 $C_Listgame.visibility="Hidden"
 $T_NametextR.visibility="Hidden"
 $B_Submit.visibility ="Hidden"
@@ -103,6 +109,7 @@ $R_install.Add_Checked({
 		$C_Listgame.visibility="Hidden"
 		$T_NametextR.visibility="Hidden"
 		$B_Submit.visibility ="visible"
+		$B_ExePath.visibility="visible"
 		$B_Submit.Content=$txt.ButtonI
 	})
 		
@@ -115,10 +122,12 @@ $R_remove.Add_Checked({
 		$T_Exetext.visibility="Hidden"
 		$T_GameExe.visibility="Hidden"
 		$T_10Bit.visibility="Hidden"
-	$C_10bit.visibility="Hidden"
+		$C_10bit.visibility="Hidden"
 		$C_Listgame.visibility="Visible"
 		$B_Submit.visibility ="visible"
+		$B_ExePath.visibility="Hidden"
 		$B_Submit.Content=$txt.ButtonR
+	
 	})
 
 $R_Uninstall.Add_Checked({
@@ -133,7 +142,18 @@ $R_Uninstall.Add_Checked({
 		$C_Listgame.visibility="Hidden"
 		$T_NametextR.visibility="Hidden"
 		$B_Submit.visibility ="visible"
+		$B_ExePath.visibility="Hidden"
 		$B_Submit.Content=$txt.ButtonU
+	})
+
+$R_install.IsChecked ="$true"
+## CLICK ON ICON GAMEPATH (EDIT FORM)
+$B_ExePath.add_Click({
+	$foldername = New-Object System.Windows.Forms.OpenFileDialog
+	$foldername.Filter = "Executable files (*.exe)|*.exe"
+		if($foldername.ShowDialog() -eq "OK") {
+			$T_GameExe.Text = $foldername.FileName
+		}
 	})
 
 #Code when clicking Ok Button

@@ -7,7 +7,7 @@ ConvertFrom-StringData @'
  mainR3 = Uninstall All
  txt1 = Enter the name of the game
  txtr = Choose game to remove
- txtexe = Enter the game's exe name (ex: game.exe or c:\\mygame\game.exe)
+ txtexe = Enter the game's exe name (ex: game.exe or c:\\mygame\\game.exe)
  txtexetooltip =  If only the exe name is written, AutoHdr will be trigger for all game that have the same exe name.\nIf the game exe with its full path is written, Only this game and exe location will trigger AutoHDR.
  txt2 = Optional setting for D3D Behaviors:
  txtBuff = BufferUpgradeEnable10Bit

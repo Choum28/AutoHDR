@@ -12,7 +12,7 @@ ConvertFrom-StringData @'
  txt2 = Optional setting for D3D Behaviors:
  txtBuff = BufferUpgradeEnable10Bit
  txtBuffTooltip = To enable only if you use a real 10bits colors monitor/TV.
- ButtonI = Install or update
+ ButtonI = Install / Update
  ButtonR = Remove Game
  ButtonU = Uninstall all
  exeend = The game exe name must end with '.exe'

@@ -14,6 +14,7 @@
 	.\AutoHdr.ps1
 	
 		Launch the script
+	1.61	23.07.2024	WPF form resizable
 	1.6		29.01.2024	Add Tooltips, Add OpenFileDialog
 	1.5		24.01.2024	Add translation support (psd1 file)
 	1.4		17.01.2024	Switch remaining Windows forms for WPF.
@@ -57,23 +58,27 @@ function Update-Game {
 #WPF form creation
 [xml]$inputXML =@"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-		Title="AutoHdr" Height="313" Width="489">
-	<Grid Margin="0,0,0,0">
-		<Label Name="L_action" HorizontalAlignment="Left" Margin="27,25,0,0" VerticalAlignment="Top"/>
-		<RadioButton Name="R_install" HorizontalAlignment="Left" Margin="259,31,0,0" VerticalAlignment="Top"/>
-		<RadioButton Name="R_remove" HorizontalAlignment="Left" Margin="259,51,0,0" VerticalAlignment="Top"/>
-		<RadioButton Name="R_uninstall" HorizontalAlignment="Left" Margin="259,71,0,0" VerticalAlignment="Top"/>
-		<Label Name="T_Nametext" HorizontalAlignment="Left" Margin="33,115,0,0" VerticalAlignment="Top"/>
-		<Label Name="T_NametextR" HorizontalAlignment="Left" Margin="33,115,0,0" VerticalAlignment="Top"/>
-		<TextBox Name="T_GameName" HorizontalAlignment="Left" Margin="287,119,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Top" Width="150"/>
-		<TextBlock Name="T_Exetext" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="38,143,0,0" VerticalAlignment="Top" Width="260"/>	
-		<TextBox Name="T_GameExe" HorizontalAlignment="Left" Margin="287,147,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Top" Width="150"/>
-		<Label Name="T_10Bit" HorizontalAlignment="Left" Margin="50,183,0,0" VerticalAlignment="Top"/>
-		<CheckBox Name="C_10bit" HorizontalAlignment="Left" Margin="287,188,0,0" VerticalAlignment="Top"/>
-		<Button Name="B_Submit" HorizontalAlignment="Left" Margin="20,230,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.265,0.155"/>
-		<ComboBox Name="C_Listgame" HorizontalAlignment="Left" Margin="287,119,0,0" VerticalAlignment="Top" Width="150"/>
-		<Button Name="B_ExePath" Content="..." HorizontalAlignment="Left" Height="22" Margin="440,145,0,0" VerticalAlignment="Top" Width="22"/>
-    </Grid>
+		Title="AutoHdr" Height="313" Width="497" MinHeight="313" MinWidth="497" ResizeMode="CanResizeWithGrip">
+	<Viewbox Stretch="Uniform" StretchDirection="UpOnly">
+		<Grid Margin="0,0,0,0">
+			<Label Name="L_action" HorizontalAlignment="Left" Margin="27,25,0,0" VerticalAlignment="Top"/>
+			<RadioButton Name="R_install" HorizontalAlignment="Left" Margin="259,31,0,0" VerticalAlignment="Top"/>
+			<RadioButton Name="R_remove" HorizontalAlignment="Left" Margin="259,51,0,0" VerticalAlignment="Top"/>
+			<RadioButton Name="R_uninstall" HorizontalAlignment="Left" Margin="259,71,0,0" VerticalAlignment="Top"/>
+			<Label Name="T_Nametext" HorizontalAlignment="Left" Margin="33,115,0,0" VerticalAlignment="Top"/>
+			<Label Name="T_NametextR" HorizontalAlignment="Left" Margin="33,115,0,0" VerticalAlignment="Top"/>
+			<TextBox Name="T_GameName" HorizontalAlignment="Left" Margin="287,119,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Top" Width="150"/>
+			<TextBlock Name="T_Exetext" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="38,143,0,0" VerticalAlignment="Top" Width="260"/>	
+			<TextBox Name="T_GameExe" HorizontalAlignment="Left" Margin="287,147,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Top" Width="150"/>
+			<Label Name="T_10Bit" HorizontalAlignment="Left" Margin="50,183,0,0" VerticalAlignment="Top"/>
+			<CheckBox Name="C_10bit" HorizontalAlignment="Left" Margin="287,188,0,0" VerticalAlignment="Top"/>
+			<Button Name="B_Submit" HorizontalAlignment="Left" Margin="20,230,0,19" VerticalAlignment="Top" RenderTransformOrigin="0.265,0.155"/>
+			<ComboBox Name="C_Listgame" HorizontalAlignment="Left" Margin="287,119,0,0" VerticalAlignment="Top" Width="150"/>
+			<Button Name="B_ExePath" Content="..." HorizontalAlignment="Left" Height="19" Margin="440,145,27,0" VerticalAlignment="Top" Width="22"/>
+			<TextBlock Name="T_URL" HorizontalAlignment="Left" TextWrapping="Wrap" Text="https://github.com/Choum28/AutoHDR" VerticalAlignment="Top" Margin="259,260,0,0" FontSize="8"/>
+			<TextBlock Name="T_version" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Version 1.7" VerticalAlignment="Top" Margin="429,260,0,0" FontSize="8"/>
+		</Grid>
+	</Viewbox>
 </Window>
 "@
 $reader=(New-Object System.Xml.XmlNodeReader $inputXML)

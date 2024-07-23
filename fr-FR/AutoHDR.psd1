@@ -13,7 +13,7 @@ ConvertFrom-StringData @'
  txt2 = Paramètre optionnel D3D Behaviors:
  txtBuff = BufferUpgradeEnable10Bit
  txtBuffTooltip = A activer si votre moniteur/TV gère une profondeur de couleurs 10bits.
- ButtonI = Installer or Mettre à jour
+ ButtonI = Installer / Mettre à jour
  ButtonR = Supprimer jeu
  ButtonU = Désinstaller tout
  exeend = Le nom de l'executable doit finir par '.exe'

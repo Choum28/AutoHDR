@@ -58,7 +58,7 @@ function Update-Game {
 #WPF form creation
 [xml]$inputXML =@"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-		Title="AutoHdr" Height="313" Width="497" MinHeight="313" MinWidth="497" ResizeMode="CanResizeWithGrip">
+		Title="AutoHdr" Height="313" Width="497" MinHeight="313" MinWidth="497" ResizeMode="CanResizeWithGrip" Icon="$PSScriptRoot\AutoHdr.ico">
 	<Viewbox Stretch="Uniform" StretchDirection="UpOnly">
 		<Grid Margin="0,0,0,0">
 			<Label Name="L_action" HorizontalAlignment="Left" Margin="27,25,0,0" VerticalAlignment="Top"/>

@@ -19,4 +19,14 @@ The Gui support :
 &nbsp;&nbsp;&nbsp;&nbsp; update of already existing game.  
 &nbsp;&nbsp;&nbsp;&nbsp; provide a uninstall function to remove all registry key created.  
 
-Exe version has been compiled with PS2EXE.
+## launch the script  
+Create a shortcut with following command:
+
+.\powershell.exe -WindowStyle Hidden -ep bypass -file "x:\xxx\Autohdr\AutoHDR.ps1"
+
+To remove the minimized windows behind the Gui, set in the properties of the shortcut Run=minimized
+
+## Note
+
+If you enter an exe name (like capture "outlaws.exe" in the gui, autohdr will trigger for all game/apps that have the same exe name.
+If you set a full path in the exe part of the gui, autohdr will only be triggered for this specific exe/path  (ex : c:\mygames\outlaws\outlaws.exe)

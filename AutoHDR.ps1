@@ -39,7 +39,7 @@ $fail = $false
 # Detect game in registry, populate combobox.
 function Update-Game {
     $C_Listgame.Items.Clear()
-    if ( (Test-Path $RegistryPath) ) {
+    if ( Test-Path $RegistryPath ) {
         $list = Get-ChildItem $RegistryPath
         if ( $list ) {
             foreach ( $entry in $list.name ) {
@@ -58,7 +58,7 @@ function Update-Game {
 #WPF form creation
 [xml]$inputXML =@"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        Title="AutoHdr" Height="313" Width="497" MinHeight="313" MinWidth="497" ResizeMode="CanResizeWithGrip" Icon="$PSScriptRoot\AutoHdr.ico">
+    Title="AutoHdr" Height="313" Width="497" MinHeight="313" MinWidth="497" ResizeMode="CanResizeWithGrip" Icon="$PSScriptRoot\AutoHdr.ico">
     <Viewbox Stretch="Uniform" StretchDirection="UpOnly">
         <Grid Margin="0,0,0,0">
             <Label Name="L_action" HorizontalAlignment="Left" Margin="27,25,0,0" VerticalAlignment="Top"/>
@@ -234,7 +234,7 @@ $B_Submit.Add_Click({
         # delete key for each game present
         # Check to not remove different key / value created by other program or manually by user.
         # Check to remove the main Direct3D key if empty.
-        if ( (Test-Path $RegistryPath) ) {
+        if ( Test-Path $RegistryPath ) {
             $list = Get-ChildItem $RegistryPath
         }
         if ( $list ) { 

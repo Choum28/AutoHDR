@@ -24,6 +24,7 @@
                         This will prevent any key or value that were not created by the script to be removed.
     1.0     06.09.2023  First version
 .LINK
+    https://github.com/Choum28/AutoHDR
  #>
 
 Add-Type -AssemblyName PresentationFramework
